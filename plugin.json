@@ -1,0 +1,6 @@
+{
+    "name" : "OpenVBX ZenDesk applet",
+    "author" : "sinneduy",
+    "description" : "Logs calls coming into VBX to a ZenDesk",
+    "url" : "http://github.com/sinneduy"
+}

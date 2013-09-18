@@ -1,0 +1,5 @@
+{
+  "name" : "OpenVBX ZenDesk Applet",
+  "description" : "Log Calls to Desk",
+  "type" : "voice"
+}
