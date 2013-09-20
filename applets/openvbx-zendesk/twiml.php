@@ -1,7 +1,7 @@
 <?php
  
 // The response object constructs the TwiML for our applet
-$response = new TwimlResponse;
+$tResponse = new TwimlResponse;
 
 //construct zendesk client object
 define("ZDAPIKEY", AppletInstance::getValue('apitoken'));
@@ -28,7 +28,6 @@ function curlWrap($url, $json, $action)
             $url .= '?' . http_build_query($json, '', '&', PHP_QUERY_RFC3986);
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-            print_r($url);
             break;
         case "PUT":
             curl_setopt($ch, CURLOPT_URL, ZDURL.$url);
@@ -54,20 +53,20 @@ function curlWrap($url, $json, $action)
 
  
 $phone = normalize_phone_to_E164($_REQUEST['From']);
-
+$phone = "+17324700250";
 
 //zendesk api call
 
-$return = curlWrap("/search.json", array("query" => "type:user phone:" . $phone), "GET");
+$response = curlWrap("/search.json", array("query" => "type:user phone:" . $phone), "GET");
 
-if($return['count'] == 0){
+if($response['count'] == 0){
   //create a new user
-  $return = curlWrap("/users.json", json_encode(array("user" => array("name"=>"Unknown Phone Caller", "phone"=>$phone))), "POST"); 
+  $response = curlWrap("/users.json", json_encode(array("user" => array("name"=>"Unknown Phone#: " . $phone, "phone"=>$phone))), "POST"); 
   //create a new ticket in the new user's name
-  $return = curlWrap("/tickets.json", json_encode(array("ticket"=> array("subject" => "New Phone Call From " . $phone, "comment" => array("body" => "call made at " . date('r')), "submitter_id" => $return['id']))), "POST");
-}else if($return['total'] == 1){
+  $response = curlWrap("/tickets.json", json_encode(array("ticket"=> array("subject" => "New Phone Call From " . $phone, "comment" => array("body" => "call made at " . date('r')), "requester_id" => $response['user']['id']))), "POST");
+}else if($response['count'] == 1){
   //create a new ticket in the name of the current user
-  $return = curlWrap("/tickets.json", json_encode(array("ticket"=> array("subject" => "New Phone Call From " . $phone, "comment" => array("body" => "Call came in at " . date('r')), "submitter_id" => $return[0]['id']))), "POST");
+  $response = curlWrap("/tickets.json", json_encode(array("ticket"=> array("subject" => "New Phone Call From " . $phone . " at " . date('r'), "comment" => array("body" => "Call came in at " . date('r')), "requester_id" => $response['results'][0]['id']))), "POST");
 }
 
 
@@ -79,8 +78,8 @@ $primary = AppletInstance::getDropZoneUrl('primary');
 // As long as the primary dropzone is not empty add the redirect 
 // twiml to $response
 if(!empty($primary)) {
-    $response->redirect($primary);
+    $tResponse->redirect($primary);
 };
  
 // This will create the twiml for hellomonkey
-$response->respond();
+$tResponse->respond();
