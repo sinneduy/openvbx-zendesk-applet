@@ -53,7 +53,7 @@ function curlWrap($url, $json, $action)
 
  
 $phone = normalize_phone_to_E164($_REQUEST['From']);
-$phone = str_replace('+', '', $phone)
+$phone = str_replace('+', '', $phone);
 
 //zendesk api call
 
